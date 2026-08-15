@@ -1,0 +1,6 @@
+# dsh-vision-plugin bundle patch: activate the Host half when this bundle is
+# listed in a profile. The browser half rides the package's dsh.client
+# declaration, discovered from the same profile dependency.
+- insert:
+    - id: vision-plugin
+      name: '@uachar/dsh-vision-plugin'

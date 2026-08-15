@@ -1,0 +1,36 @@
+{
+  "extends": "../../../tsconfig.base.client.json",
+  "compilerOptions": {
+    "rootDir": "src",
+    "outDir": "lib/types",
+    "tsBuildInfoFile": "lib/tsconfig.client.tsbuildinfo",
+    "paths": {
+      "@uachar/dsh-vision-plugin/remote": ["./lib/typert.remote-client.d.ts"]
+    }
+  },
+  "files": [
+    "src/client/index.ts",
+    "src/css-modules.d.ts",
+    "src/types.ts"
+  ],
+  "references": [
+    {
+      "path": "../../../vendor/cordis"
+    },
+    {
+      "path": "../../client/runtime"
+    },
+    {
+      "path": "../../client/ui-conversation"
+    },
+    {
+      "path": "../../client/ui-slots"
+    },
+    {
+      "path": "../../api/remotes/tsconfig.client.json"
+    },
+    {
+      "path": "../../typert/protocol"
+    }
+  ]
+}
