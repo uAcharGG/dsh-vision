@@ -16,9 +16,12 @@ The readAttachment RPC historically authorized only core `image` blocks, so `vis
 
 ## Installation
 
-Install through dsh-launcher (local path → `D:\Pro\dsh-vision`), or manually:
+Install through dsh-launcher (local path → `D:\Pro\dsh-vision`), from the packaged release tarball, or manually:
 
 ```sh
+# packaged release (GitHub Releases)
+pnpm dsh plugin --profile web add https://github.com/uAcharGG/dsh-vision/releases/download/v0.1.0/uachar-dsh-vision-plugin-0.1.0.tgz
+# or the source checkout
 pnpm dsh plugin --profile web add link:D:\Pro\dsh-vision
 ```
 

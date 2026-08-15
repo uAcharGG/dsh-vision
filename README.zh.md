@@ -16,9 +16,12 @@ DeepSeek Harness 的视觉识别插件：把图片粘贴到 Web 输入框，Host
 
 ## 安装
 
-通过 dsh-launcher（本地路径 → `D:\Pro\dsh-vision`）安装，或手动执行：
+通过 dsh-launcher（本地路径 → `D:\Pro\dsh-vision`）安装，或使用打包好的 Release tarball，或手动执行：
 
 ```sh
+# 打包发布（GitHub Releases）
+pnpm dsh plugin --profile web add https://github.com/uAcharGG/dsh-vision/releases/download/v0.1.0/uachar-dsh-vision-plugin-0.1.0.tgz
+# 或源码目录
 pnpm dsh plugin --profile web add link:D:\Pro\dsh-vision
 ```
 
