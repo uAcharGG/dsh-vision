@@ -32,7 +32,7 @@ pnpm dsh plugin --profile web add link:D:\Pro\dsh-vision
 2. 添加模型（默认 `glm-4v-flash`）与 API Key（智谱开放平台，端点 `https://open.bigmodel.cn/api/paas/v4/chat/completions`）。
 3. 粘贴图片发送；纯图片会自动补"请描述这张图片的内容"。
 
-> 模型与 API Key 仅保存在 Host 进程内存中，重启后丢失。需要持久化时可换成 settings/credentials 后端。
+> 模型与 API Key 会持久化到本地纯 JSON 配置文件 `$DSH_HOME\vision-config.json`（默认 `~\.dsh\vision-config.json`）：插件首次加载时自动生成（空配置），每次配置变更即重写，重启 dsh 后自动重新读取——模型与 Key 重启不丢失。该文件仅存本地、未加密、不进 git，经 dsh-launcher 卸载插件时自动删除。
 
 ## 结构
 
@@ -56,7 +56,7 @@ node node_modules/tsdown/dist/run.mjs --config tsdown.config.ts
 
 ## 已知限制
 
-- 模型条目 / API Key 仅存内存（重启丢失）。
+- 配置持久化为 `$DSH_HOME` 下的明文 JSON 文件；API Key 属于敏感本地数据，请注意保管。
 - GLM-4V 识别需要有效的智谱 API Key（在 dock 中配置）。
 - dsh 附件补丁针对本地源码目录的 `api-proxy.ts`；若目录结构与预期不符，脚本拒绝自动打补丁并提示所需改动。
 

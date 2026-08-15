@@ -11,6 +11,9 @@
  * @module @uachar/dsh-vision-plugin
  */
 
+import { existsSync, readFileSync, writeFileSync } from 'node:fs'
+import { homedir } from 'node:os'
+import { join } from 'node:path'
 import { Context } from '@deepseek-ai/cordis'
 import { Remote, TypertRemoteService } from '@deepseek-ai/dsh-typert-protocol'
 // Type-only: pulls the agent/pre-step event signature into ctx.on typing.
@@ -111,8 +114,12 @@ interface StoredEntry {
 }
 
 /**
- * Vision recognition service. Model entries live in memory (per-process); a
- * deployment that needs persistence should layer a settings-backed store.
+ * Vision recognition service. Model entries are persisted to a plain local
+ * JSON config file under the dsh home (`$DSH_HOME/vision-config.json`, i.e.
+ * `~/.dsh/vision-config.json` by default): created empty on first use,
+ * rewritten on every config change, and re-read on restart so the model and
+ * API key survive process restarts. The file is not versioned by git, not
+ * encrypted, and removed when the plugin is uninstalled through the manager.
  */
 export class VisionService extends TypertRemoteService {
   static inject: string[] = []
@@ -121,6 +128,7 @@ export class VisionService extends TypertRemoteService {
   private current = ''
   private readonly pendingImages: VisionQueueRequest[] = []
   private count = 0
+  private readonly configPath: string
 
   /** Cordis service constructor: binds `ctx.vision` and the `vision` wire namespace. */
   constructor(ctx: Context) {
@@ -128,12 +136,49 @@ export class VisionService extends TypertRemoteService {
     // Self-heal the dsh attachment-authorization patch (history thumbnails
     // need it); no-op when already applied.
     ensureDshAttachmentPatch(ctx)
+    this.configPath = join(process.env.DSH_HOME ?? join(homedir(), '.dsh'), 'vision-config.json')
+    this.loadConfig()
     this.install(ctx)
   }
 
   /** The currently selected model entry, or the first entry as a fallback. */
   private currentEntry(): StoredEntry | undefined {
     return this.entries.find((e) => e.model === this.current) ?? this.entries[0]
+  }
+
+  /** Load the persisted config from `$DSH_HOME/vision-config.json`; create it empty on first use. */
+  private loadConfig(): void {
+    try {
+      if (!existsSync(this.configPath)) {
+        writeFileSync(this.configPath, JSON.stringify({ current: '', entries: [] }, null, 2), 'utf8')
+        return
+      }
+      const raw = JSON.parse(readFileSync(this.configPath, 'utf8')) as {
+        current?: unknown
+        entries?: unknown
+      }
+      this.current = typeof raw.current === 'string' ? raw.current : ''
+      this.entries = Array.isArray(raw.entries)
+        ? raw.entries.filter((e): e is StoredEntry =>
+          typeof e === 'object' && e !== null
+          && typeof (e as { model?: unknown }).model === 'string'
+          && typeof (e as { apiKey?: unknown }).apiKey === 'string')
+          .map((e) => ({ model: (e as { model: string }).model, apiKey: (e as { apiKey: string }).apiKey }))
+        : []
+    } catch {
+      // Corrupt or unreadable file: fall back to empty config (kept on disk).
+      this.current = ''
+      this.entries = []
+    }
+  }
+
+  /** Persist the current entries back to the config file (plain JSON, no encryption). */
+  private saveConfig(): void {
+    try {
+      writeFileSync(this.configPath, JSON.stringify({ current: this.current, entries: this.entries }, null, 2), 'utf8')
+    } catch {
+      // Persistence must never break a config round-trip.
+    }
   }
 
   /** Enqueue one pasted image for the next pre-step. */
@@ -175,6 +220,7 @@ export class VisionService extends TypertRemoteService {
         }
         this.current = model
       }
+      this.saveConfig()
     }
     return {
       ok: true,
