@@ -143,8 +143,14 @@ export function VisionDock({
   const submitWithImages = useCallback((): void => {
     if (submittingRef.current) return
     submittingRef.current = true
-    const images = pendingImagesRef.current.slice()
+    // Only queue images that are still present in the draft: the user may have
+    // removed some (or all) pasted images from the composer before sending —
+    // the buffered list must be trimmed to match, otherwise the deleted images
+    // still get recognized and injected into the model context.
+    const draftCount = imageIdsRef.current.length
+    const buffered = pendingImagesRef.current.slice()
     pendingImagesRef.current = []
+    const images = draftCount >= buffered.length ? buffered : buffered.slice(0, draftCount)
     const actions = inputActionsRef.current
     try {
       const draftText = draftRef.current.trim()
