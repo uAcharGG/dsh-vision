@@ -1,7 +1,7 @@
 {
     "name": "@uachar/dsh-vision-plugin",
     "description": "Vision recognition plugin for DeepSeek Harness: paste images into the composer, recognize them via GLM-4V on the host side, and inject the result into the conversation.",
-    "version": "0.1.1",
+    "version": "0.1.2",
     "type": "module",
     "main": "lib/index.js",
     "types": "lib/types/index.d.ts",
