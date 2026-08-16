@@ -45,6 +45,13 @@
                   "lib/typert.remote-client.d.ts"
               ],
     "license":  "MIT",
+    "repository":  {
+                       "type":  "git",
+                       "url":  "https://github.com/uAcharGG/dsh-vision.git"
+                   },
+    "publishConfig":  {
+                          "access":  "public"
+                      },
     "dsh":  {
                 "bundle":  {
                                "patch":  "./cordis.patch.yml"

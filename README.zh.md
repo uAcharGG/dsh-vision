@@ -1,67 +1,79 @@
-# dsh-vision-plugin
+# @uachar/dsh-vision-plugin（视觉识别）
 
-DeepSeek Harness 的视觉识别插件：把图片粘贴到 Web 输入框，Host 侧经 **GLM-4V** 识别，并把识别结果作为隐藏上下文消息注入对话。原生双面（Host + 浏览器）插件，经 dsh-launcher 安装与管理。
+DeepSeek Harness 的视觉识别插件：把图片粘贴到 Web 输入框，Host 侧经 **GLM-4V** 识别，并把识别结果作为隐藏上下文消息注入对话。原生双面（Host + 浏览器）插件，作为独立包安装。
 
-## 工作原理
+## 插件功能
 
-1. 在 Web 输入框粘贴一张或多张图片并发送。
-2. 浏览器半（`conversation.input.dock`）把图片字节经 `ctx.remote.vision.queue` 送到 Host 半。
-3. Host 半在 `agent/pre-step` 中把每张图片存为持久 attachment，向历史写入 `vision-image` 块（UI 渲染缩略图；DeepSeek 文本序列化器忽略该块），并调用 **GLM-4V**。
-4. 识别结果作为隐藏上下文用户消息追加，主模型据此回答图片内容。
-5. `llm/stream` 同时剥离模型请求中残留的 `image` 块（DeepSeek 序列化器不支持图片）。
+- **粘贴即识别** —— 输入框中粘贴一张或多张图片，发送后自动转发给 Host 识别。
+- **GLM-4V 识别** —— Host 调用智谱 GLM-4V，把识别结果作为隐藏上下文用户消息追加，让主模型基于图片真实内容作答。
+- **缩略图可见** —— 识别过的图片存为持久附件，在历史消息中渲染缩略图。
+- **模型 / API Key 设置** —— 输入框上方出现"视觉识别"Dock，齿轮图标内可添加模型（默认 `glm-4v-flash`）与 API Key；持久化到 `$DSH_HOME/vision-config.json`。
+- **自愈式 dsh 补丁** —— 加载时 Host 侧检查 dsh checkout 的附件授权补丁，缺失则自动应用（幂等的一行改动 + apiproxy 重建）。
 
-### dsh 附件授权自修复补丁
+## 如何使用
 
-历史缩略图加载依赖 readAttachment 授权，而该授权历史上只放行核心 `image` 块，导致 `vision-image` 缩略图加载失败（`ATTACHMENT_NOT_REFERENCED`）。插件 Host 半在加载时检查 dsh 源码中的 `imageBlockIn`，若缺少补丁则自动执行 `scripts/apply-dsh-patch.mjs`——一行幂等改动 + apiproxy 重建。不依赖 launcher 或安装钩子；该补丁对所有携带 attachment 的插件块都有益。
+1. 打开会话——输入框上方出现**视觉识别** Dock。
+2. 点齿轮图标，添加模型（默认 `glm-4v-flash`）与智谱 API Key（端点 `https://open.bigmodel.cn/api/paas/v4/chat/completions`）。
+3. 粘贴图片并发送；纯图片会自动填入"请描述这张图片的内容"。
 
-## 安装
+> 模型与 API Key 持久化到本地纯文本 JSON `$DSH_HOME/vision-config.json`（默认 `~/.dsh/vision-config.json`）：首次加载自动创建空文件，每次配置修改重写，重启后重新读取。文件仅本地保存、不加密、不入 git；通过管理面板卸载插件时会自动删除。
 
-通过 dsh-launcher（本地路径 → `D:\Pro\dsh-vision`）安装，或使用打包好的 Release tarball，或手动执行：
+## 安装与卸载
+
+> 需要可用的 `dsh` CLI（pnpm）与一个 profile，例如 `web`。
+
+### 从 npm 安装（推荐）
 
 ```sh
-# 打包发布（GitHub Releases）
-pnpm dsh plugin --profile web add https://github.com/uAcharGG/dsh-vision/releases/download/v0.1.0/uachar-dsh-vision-plugin-0.1.0.tgz
-# 或源码目录
-pnpm dsh plugin --profile web add link:D:\Pro\dsh-vision
+pnpm dsh plugin --profile web add @uachar/dsh-vision-plugin
 ```
 
-之后**重启 dsh**。浏览器半通过包的 `dsh.client` 声明自动被发现。
-
-## 配置
-
-新建会话后，输入框上方出现「视觉识别」dock：
-
-1. 点击齿轮图标。
-2. 添加模型（默认 `glm-4v-flash`）与 API Key（智谱开放平台，端点 `https://open.bigmodel.cn/api/paas/v4/chat/completions`）。
-3. 粘贴图片发送；纯图片会自动补"请描述这张图片的内容"。
-
-> 模型与 API Key 会持久化到本地纯 JSON 配置文件 `$DSH_HOME\vision-config.json`（默认 `~\.dsh\vision-config.json`）：插件首次加载时自动生成（空配置），每次配置变更即重写，重启 dsh 后自动重新读取——模型与 Key 重启不丢失。该文件仅存本地、未加密、不进 git，经 dsh-launcher 卸载插件时自动删除。
-
-## 结构
-
-| 半 | 文件 | 职责 |
-|---|---|---|
-| Host | `src/index.ts` | `VisionService extends TypertRemoteService`：`@Remote` `queue`/`config`/`status` + `agent/pre-step`、`llm/stream` 监听 + GLM 调用 |
-| Client | `src/client/index.ts` | `conversation.input.dock` 插槽：粘贴拦截、发送拦截、模型/API Key 设置菜单 |
-| 补丁 | `src/patch.ts` + `scripts/apply-dsh-patch.mjs` | dsh 附件授权自修复补丁 |
-| 类型 | `src/types.ts` | 跨面 wire 类型（无损 JSON） |
-
-## 构建
-
-Host 半可独立构建：
+### 从 GitHub Release tarball 安装
 
 ```sh
+pnpm dsh plugin --profile web add https://github.com/uAcharGG/dsh-vision/releases/download/v0.1.0/uachar-dsh-vision-plugin-0.1.0.tgz
+```
+
+### 从源码构建并安装
+
+```sh
+git clone https://github.com/uAcharGG/dsh-vision.git
+cd dsh-vision
+pnpm install
+# Host 侧：
 node node_modules/typescript/bin/tsc -p tsconfig.json
 node node_modules/tsdown/dist/run.mjs --config tsdown.config.ts
+pnpm dsh plugin --profile web add link:<本目录的绝对路径>
 ```
 
-浏览器 bundle（`lib/client.js`）与 typert 生成面（`lib/typert.host.js` / `lib/typert.remote-client.js`）是构建期产物，目前由 dsh workspace 构建生成；仓库内的 `tsconfig.client.json` 仍引用 dsh 源码目录。要在 workspace 之外完整重建 client 半，需先迁移该配置与 typert 生成步骤。
+> 客户端产物（`lib/client.js`）与 typert 生成的双面（`lib/typert.host.js` / `lib/typert.remote-client.js`）是 dsh workspace 构建的产物；仓库内的 `tsconfig.client.json` 仍引用 dsh checkout。若要在 workspace 外重建客户端，需先迁移该配置与 typert 生成步骤。
 
-## 已知限制
+安装后**重启 dsh** 生效；浏览器侧通过包的 `dsh.client` 声明自动发现。
 
-- 配置持久化为 `$DSH_HOME` 下的明文 JSON 文件；API Key 属于敏感本地数据，请注意保管。
-- GLM-4V 识别需要有效的智谱 API Key（在 dock 中配置）。
-- dsh 附件补丁针对本地源码目录的 `api-proxy.ts`；若目录结构与预期不符，脚本拒绝自动打补丁并提示所需改动。
+### 卸载
+
+```sh
+pnpm dsh plugin --profile web remove @uachar/dsh-vision-plugin
+```
+
+随后重启 dsh。（经管理面板卸载会同时删除 `$DSH_HOME/vision-config.json`。）
+
+## 项目文件结构
+
+| 文件 | 职责 |
+|---|---|
+| `src/index.ts` | Host 侧：`VisionService extends TypertRemoteService` —— `@Remote` `queue`/`config`/`status` + `agent/pre-step` 与 `llm/stream` 监听 + GLM 调用 |
+| `src/client/index.ts` | 浏览器侧：`conversation.input.dock` 插槽 —— 粘贴捕获、提交拦截、模型/API Key 设置菜单 |
+| `src/patch.ts` + `scripts/apply-dsh-patch.mjs` | 自愈式 dsh 附件授权补丁 |
+| `src/types.ts` | 双面跨进程线协议类型（无损 JSON） |
+| `cordis.patch.yml` | bundle 组合层 |
+| `lib/` | 构建产物（随包发布） |
+
+## 使用限制
+
+- 配置为 `$DSH_HOME` 下的明文 JSON 文件；API Key 属于敏感本地数据。
+- GLM-4V 识别需要 Dock 中配置有效的智谱 API Key。
+- dsh 附件补丁针对本地 checkout 的 `api-proxy.ts` 应用；若 checkout 结构不同，脚本会拒绝自动打补丁并报告所需改动。
 
 ## 许可
 
