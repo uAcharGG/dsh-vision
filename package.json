@@ -1,101 +1,101 @@
 {
-    "name":  "@uachar/dsh-vision-plugin",
-    "description":  "Vision recognition plugin for DeepSeek Harness: paste images into the composer, recognize them via GLM-4V on the host side, and inject the result into the conversation.",
-    "version":  "0.1.0",
-    "type":  "module",
-    "main":  "lib/index.js",
-    "types":  "lib/types/index.d.ts",
-    "exports":  {
-                    ".":  {
-                              "types":  "./lib/types/index.d.ts",
-                              "default":  "./lib/index.js"
-                          },
-                    "./client":  {
-                                     "types":  "./lib/types/client/index.d.ts",
-                                     "default":  "./lib/client.js"
-                                 },
-                    "./types":  {
-                                    "types":  "./lib/types/types.d.ts",
-                                    "default":  "./lib/types/types.js"
-                                },
-                    "./invariant":  {
-                                        "types":  "./lib/types/invariant.d.ts",
-                                        "default":  "./lib/invariant.js"
-                                    },
-                    "./remote":  {
-                                     "types":  "./lib/typert.remote-client.d.ts",
-                                     "default":  "./lib/typert.remote-client.js"
-                                 },
-                    "./typert":  {
-                                     "types":  "./lib/typert.host.d.ts",
-                                     "default":  "./lib/typert.host.js"
-                                 },
-                    "./src/*":  "./src/*",
-                    "./package.json":  "./package.json"
-                },
-    "files":  [
-                  "lib/index.js",
-                  "lib/client.js",
-                  "lib/invariant.js",
-                  "lib/types/**/*.js",
-                  "lib/types/**/*.d.ts",
-                  "lib/typert.host.js",
-                  "lib/typert.host.d.ts",
-                  "lib/typert.remote-client.js",
-                  "lib/typert.remote-client.d.ts"
-              ],
-    "license":  "MIT",
-    "repository":  {
-                       "type":  "git",
-                       "url":  "https://github.com/uAcharGG/dsh-vision.git"
-                   },
-    "publishConfig":  {
-                          "access":  "public"
-                      },
-    "dsh":  {
-                "bundle":  {
-                               "patch":  "./cordis.patch.yml"
-                           },
-                "client":  {
-                               "platform":  "web",
-                               "inject":  [
-                                              "@deepseek-ai/dsh-client-runtime",
-                                              "@deepseek-ai/dsh-client-ui-conversation",
-                                              "@deepseek-ai/dsh-api-remotes"
-                                          ]
-                           },
-                "patchHook":  "scripts/apply-dsh-patch.mjs"
-            },
-    "peerDependencies":  {
-                             "@deepseek-ai/cordis":  "workspace:^",
-                             "@deepseek-ai/dsh-agent":  "workspace:^",
-                             "@deepseek-ai/dsh-attachment":  "workspace:^",
-                             "@deepseek-ai/dsh-client-runtime":  "workspace:^",
-                             "@deepseek-ai/dsh-client-ui-conversation":  "workspace:^",
-                             "@deepseek-ai/dsh-llm":  "workspace:^",
-                             "@deepseek-ai/dsh-session":  "workspace:^",
-                             "@deepseek-ai/dsh-subprocess":  "workspace:^",
-                             "@deepseek-ai/dsh-typert-protocol":  "workspace:^"
-                         },
-    "devDependencies":  {
-                            "@deepseek-ai/cordis":  "workspace:^",
-                            "@deepseek-ai/dsh-agent":  "workspace:^",
-                            "@deepseek-ai/dsh-api-remotes":  "workspace:^",
-                            "@deepseek-ai/dsh-attachment":  "workspace:^",
-                            "@deepseek-ai/dsh-client-runtime":  "workspace:^",
-                            "@deepseek-ai/dsh-client-ui-conversation":  "workspace:^",
-                            "@deepseek-ai/dsh-client-ui-slots":  "workspace:^",
-                            "@deepseek-ai/dsh-invariants":  "workspace:^",
-                            "@deepseek-ai/dsh-llm":  "workspace:^",
-                            "@deepseek-ai/dsh-session":  "workspace:^",
-                            "@deepseek-ai/dsh-subprocess":  "workspace:^",
-                            "@deepseek-ai/dsh-typert-protocol":  "workspace:^",
-                            "@types/react":  "~18.3.1",
-                            "react":  "^18.2.0",
-                            "zod":  "^4.4.3"
-                        },
-    "scripts":  {
-                    "prepare":  "node -e \"console.log('[vision-prepare] RAN')\" && node scripts/apply-dsh-patch.mjs",
-                    "patch:dsh":  "node scripts/apply-dsh-patch.mjs"
-                }
+    "name": "@uachar/dsh-vision-plugin",
+    "description": "Vision recognition plugin for DeepSeek Harness: paste images into the composer, recognize them via GLM-4V on the host side, and inject the result into the conversation.",
+    "version": "0.1.1",
+    "type": "module",
+    "main": "lib/index.js",
+    "types": "lib/types/index.d.ts",
+    "exports": {
+        ".": {
+            "types": "./lib/types/index.d.ts",
+            "default": "./lib/index.js"
+        },
+        "./client": {
+            "types": "./lib/types/client/index.d.ts",
+            "default": "./lib/client.js"
+        },
+        "./types": {
+            "types": "./lib/types/types.d.ts",
+            "default": "./lib/types/types.js"
+        },
+        "./invariant": {
+            "types": "./lib/types/invariant.d.ts",
+            "default": "./lib/invariant.js"
+        },
+        "./remote": {
+            "types": "./lib/typert.remote-client.d.ts",
+            "default": "./lib/typert.remote-client.js"
+        },
+        "./typert": {
+            "types": "./lib/typert.host.d.ts",
+            "default": "./lib/typert.host.js"
+        },
+        "./src/*": "./src/*",
+        "./package.json": "./package.json"
+    },
+    "files": [
+        "lib/index.js",
+        "lib/client.js",
+        "lib/invariant.js",
+        "lib/types/**/*.js",
+        "lib/types/**/*.d.ts",
+        "lib/typert.host.js",
+        "lib/typert.host.d.ts",
+        "lib/typert.remote-client.js",
+        "lib/typert.remote-client.d.ts"
+    ],
+    "license": "MIT",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/uAcharGG/dsh-vision.git"
+    },
+    "publishConfig": {
+        "access": "public"
+    },
+    "dsh": {
+        "bundle": {
+            "patch": "./cordis.patch.yml"
+        },
+        "client": {
+            "platform": "web",
+            "inject": [
+                "@deepseek-ai/dsh-client-runtime",
+                "@deepseek-ai/dsh-client-ui-conversation",
+                "@deepseek-ai/dsh-api-remotes"
+            ]
+        },
+        "patchHook": "scripts/apply-dsh-patch.mjs"
+    },
+    "peerDependencies": {
+        "@deepseek-ai/cordis": "workspace:^",
+        "@deepseek-ai/dsh-agent": "workspace:^",
+        "@deepseek-ai/dsh-attachment": "workspace:^",
+        "@deepseek-ai/dsh-client-runtime": "workspace:^",
+        "@deepseek-ai/dsh-client-ui-conversation": "workspace:^",
+        "@deepseek-ai/dsh-llm": "workspace:^",
+        "@deepseek-ai/dsh-session": "workspace:^",
+        "@deepseek-ai/dsh-subprocess": "workspace:^",
+        "@deepseek-ai/dsh-typert-protocol": "workspace:^"
+    },
+    "devDependencies": {
+        "@deepseek-ai/cordis": "workspace:^",
+        "@deepseek-ai/dsh-agent": "workspace:^",
+        "@deepseek-ai/dsh-api-remotes": "workspace:^",
+        "@deepseek-ai/dsh-attachment": "workspace:^",
+        "@deepseek-ai/dsh-client-runtime": "workspace:^",
+        "@deepseek-ai/dsh-client-ui-conversation": "workspace:^",
+        "@deepseek-ai/dsh-client-ui-slots": "workspace:^",
+        "@deepseek-ai/dsh-invariants": "workspace:^",
+        "@deepseek-ai/dsh-llm": "workspace:^",
+        "@deepseek-ai/dsh-session": "workspace:^",
+        "@deepseek-ai/dsh-subprocess": "workspace:^",
+        "@deepseek-ai/dsh-typert-protocol": "workspace:^",
+        "@types/react": "~18.3.1",
+        "react": "^18.2.0",
+        "zod": "^4.4.3"
+    },
+    "scripts": {
+        "prepare": "node -e \"console.log('[vision-prepare] RAN')\" && node scripts/apply-dsh-patch.mjs",
+        "patch:dsh": "node scripts/apply-dsh-patch.mjs"
+    }
 }
